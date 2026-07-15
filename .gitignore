@@ -1,0 +1,28 @@
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.kubeconfig
+kubeconfig
+secrets/
+*secret.local.yaml
+
+# Generated evidence and temporary files
+*.log
+*.tmp
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Editors
+.idea/
+.vscode/
+
+# Local build metadata
+build-info.json
