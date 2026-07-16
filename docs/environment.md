@@ -11,6 +11,8 @@
 | kubeadm | v1.33.13 |
 | kubelet | v1.33.13 |
 | kubectl | v1.33.13 |
+| Helm | v4.2.3 |
+| NFS CSI driver | v4.13.4 (`nfs.csi.k8s.io`) |
 | Cgroup driver containerd | systemd |
 | Swap | отключён |
 

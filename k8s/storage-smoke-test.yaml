@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storage-smoke-test
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-smoke-pvc
+  namespace: storage-smoke-test
+spec:
+  storageClassName: nfs-csi
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-writer
+  namespace: storage-smoke-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-writer
+  template:
+    metadata:
+      labels:
+        app: nfs-writer
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: writer
+          image: busybox:1.36.1
+          command:
+            - sh
+            - -c
+            - |
+              if [ ! -f /data/proof.txt ]; then
+                echo "CSI создал $(date -u) в Pod $(hostname)" > /data/proof.txt
+              fi
+              sleep 3600
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: storage
+              mountPath: /data
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: nfs-smoke-pvc

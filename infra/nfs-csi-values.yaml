@@ -1,0 +1,7 @@
+image:
+  nfs:
+    tag: v4.13.4
+
+controller:
+  runOnControlPlane: true
+  defaultOnDeletePolicy: retain
