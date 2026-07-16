@@ -37,3 +37,20 @@ kubectl apply -f k8s/storageclass-nfs-csi.yaml
 ```bash
 kubectl apply -f k8s/storage-smoke-test.yaml
 ```
+
+## CRI-O
+
+Узлы подготовлены к переходу с containerd на CRI-O командой:
+
+```bash
+sudo ./infra/prepare-crio.sh
+```
+
+Скрипт устанавливает и фиксирует CRI-O `1.33.13`, сохраняет исходные параметры
+kubelet, меняет CRI endpoint и настраивает `crictl`. Остановка runtime и reboot
+намеренно выполняются вручную только после `kubectl drain`.
+
+Workers переключаются по одному. Перед перезагрузкой control plane PostgreSQL
+масштабируется до нуля, поскольку kube1 также предоставляет NFS. После каждого
+узла проверяются Ready, системные DaemonSet Pod, DNS и создание контейнера с
+идентификатором `cri-o://`.

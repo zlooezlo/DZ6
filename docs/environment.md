@@ -7,7 +7,8 @@
 | ОС | Ubuntu Server 24.04.4 LTS |
 | Архитектура | x86_64 |
 | Ядро | 6.8.0-134-generic |
-| Container runtime | containerd 2.2.1 |
+| Container runtime | CRI-O 1.33.13 |
+| Runtime до бонусной миграции | containerd 2.2.1 |
 | kubeadm | v1.33.13 |
 | kubelet | v1.33.13 |
 | kubectl | v1.33.13 |
