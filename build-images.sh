@@ -1,22 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${REGISTRY:?Set REGISTRY, for example REGISTRY=registry.example.com/student}"
-IMAGE="$REGISTRY/k8s-homework-backend"
+REGISTRY="${REGISTRY:-zlooezlo}"
+BACKEND_IMAGE="$REGISTRY/k8s-homework-backend"
+FRONTEND_IMAGE="$REGISTRY/k8s-homework-frontend"
 
 docker build ./backend \
   --build-arg APP_VERSION=v1 \
   --build-arg RELEASE_MESSAGE="initial release" \
-  -t "$IMAGE:v1"
+  -t "$BACKEND_IMAGE:v1"
 
 docker build ./backend \
   --build-arg APP_VERSION=v2 \
   --build-arg RELEASE_MESSAGE="rolling update completed" \
-  -t "$IMAGE:v2"
+  -t "$BACKEND_IMAGE:v2"
 
-docker push "$IMAGE:v1"
-docker push "$IMAGE:v2"
+docker build ./frontend \
+  -t "$FRONTEND_IMAGE:v1"
+
+docker push "$BACKEND_IMAGE:v1"
+docker push "$BACKEND_IMAGE:v2"
+docker push "$FRONTEND_IMAGE:v1"
 
 echo "Built and pushed:"
-echo "  $IMAGE:v1"
-echo "  $IMAGE:v2"
+echo "  $BACKEND_IMAGE:v1"
+echo "  $BACKEND_IMAGE:v2"
+echo "  $FRONTEND_IMAGE:v1"

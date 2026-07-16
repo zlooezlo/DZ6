@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kubernetes Homework</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
@@ -9,14 +10,18 @@
     <main>
         <h1>Kubernetes Homework</h1>
 
-        <p>Frontend: <strong id="frontend-version">v1</strong></p>
-        <p>Backend: <strong id="backend-version">загрузка...</strong></p>
-        <p>Pod: <strong id="backend-pod">загрузка...</strong></p>
-        <p>Посещения: <strong id="visits">загрузка...</strong></p>
+        <section class="status-card" aria-live="polite">
+            <p>Frontend: <strong id="frontend-version">загрузка...</strong></p>
+            <p>Backend: <strong id="backend-version">загрузка...</strong></p>
+            <p>Pod: <strong id="backend-pod">загрузка...</strong></p>
+            <p>Посещения: <strong id="visits">загрузка...</strong></p>
+        </section>
 
-        <button id="refresh">Обновить</button>
+        <button id="refresh" type="button">Обновить</button>
+        <p id="error" role="alert"></p>
     </main>
 
+    <script src="/config.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>

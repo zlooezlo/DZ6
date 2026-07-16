@@ -3,7 +3,7 @@
 ## 1. Подготовка образов
 
 ```bash
-export REGISTRY=registry.example.com/student
+export REGISTRY=zlooezlo
 ./build-images.sh
 ```
 

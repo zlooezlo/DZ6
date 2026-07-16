@@ -15,7 +15,7 @@
 - `backend/` - Python/Flask backend и Dockerfile;
 - `k8s/` - базовые манифесты backend;
 - `build-images.sh` - сборка и публикация v1/v2;
-- `ROLLING_UPDATE.md` - пошаговая лабораторная.
+- `ROLLING_UPDATE_MINDPATH.md` - пошаговая лабораторная.
 
 ## Важное ограничение
 
