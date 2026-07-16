@@ -26,6 +26,7 @@ spec:
         app.kubernetes.io/part-of: dz6
         app.kubernetes.io/version: v1
     spec:
+      serviceAccountName: frontend
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 30
       securityContext:

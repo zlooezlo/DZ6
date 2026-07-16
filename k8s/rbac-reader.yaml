@@ -1,0 +1,61 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: homework-reader
+  namespace: homework
+  labels:
+    app.kubernetes.io/name: homework-reader
+    app.kubernetes.io/part-of: dz6
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - services
+      - configmaps
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods/log
+    verbs:
+      - get
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: homework-reader
+  namespace: homework
+  labels:
+    app.kubernetes.io/name: homework-reader
+    app.kubernetes.io/part-of: dz6
+subjects:
+  - kind: ServiceAccount
+    name: homework-reader
+    namespace: homework
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: homework-reader
