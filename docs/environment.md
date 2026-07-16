@@ -13,6 +13,7 @@
 | kubectl | v1.33.13 |
 | Helm | v4.2.3 |
 | NFS CSI driver | v4.13.4 (`nfs.csi.k8s.io`) |
+| PostgreSQL | 15.18 (`postgres:15.18-alpine3.24`) |
 | Cgroup driver containerd | systemd |
 | Swap | отключён |
 
