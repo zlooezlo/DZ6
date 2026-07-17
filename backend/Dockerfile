@@ -1,11 +1,11 @@
 FROM python:3.13-slim
 
-ARG APP_VERSION=v1
-ARG RELEASE_MESSAGE="initial release"
+ARG APP_VERSION=v3-tls
+ARG RELEASE_MESSAGE="end-to-end TLS release"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=8080
+    PORT=8443
 
 WORKDIR /app
 
@@ -19,6 +19,6 @@ RUN printf '{"version":"%s","message":"%s"}\n' \
     && chown -R 10001:10001 /app
 
 USER 10001:10001
-EXPOSE 8080
+EXPOSE 8443
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "2", "--access-logfile", "-", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8443", "--certfile", "/etc/dz6-tls/tls.crt", "--keyfile", "/etc/dz6-tls/tls.key", "--workers", "2", "--threads", "2", "--access-logfile", "-", "app:app"]

@@ -1,0 +1,12 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: frontend-transport
+  namespace: homework
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: dz6
+spec:
+  serverName: frontend.homework.svc.cluster.local
+  rootCAsSecrets:
+    - dz6-ca

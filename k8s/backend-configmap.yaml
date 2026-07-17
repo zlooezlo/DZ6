@@ -6,7 +6,9 @@ metadata:
   labels:
     app.kubernetes.io/name: backend
 data:
-  DB_HOST: postgres
+  DB_HOST: postgres.homework.svc.cluster.local
   DB_PORT: "5432"
   DB_NAME: app
   DB_USER: app
+  DB_SSLMODE: verify-full
+  DB_SSLROOTCERT: /etc/dz6-tls/ca.crt

@@ -24,7 +24,7 @@ spec:
       labels:
         app.kubernetes.io/name: frontend
         app.kubernetes.io/part-of: dz6
-        app.kubernetes.io/version: v1
+        app.kubernetes.io/version: v2-tls
     spec:
       serviceAccountName: frontend
       automountServiceAccountToken: false
@@ -46,30 +46,33 @@ spec:
               app.kubernetes.io/name: frontend
       containers:
         - name: frontend
-          image: zlooezlo/k8s-homework-frontend:v1
+          image: zlooezlo/k8s-homework-frontend:v2-tls
           imagePullPolicy: IfNotPresent
           ports:
-            - name: http
-              containerPort: 8080
+            - name: https
+              containerPort: 8443
               protocol: TCP
           startupProbe:
             httpGet:
               path: /healthz
-              port: http
+              port: https
+              scheme: HTTPS
             periodSeconds: 2
             timeoutSeconds: 2
             failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /healthz
-              port: http
+              port: https
+              scheme: HTTPS
             periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /healthz
-              port: http
+              port: https
+              scheme: HTTPS
             periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
@@ -89,7 +92,14 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            - name: frontend-tls
+              mountPath: /etc/dz6-tls
+              readOnly: true
       volumes:
         - name: tmp
           emptyDir:
             sizeLimit: 32Mi
+        - name: frontend-tls
+          secret:
+            secretName: frontend-tls
+            defaultMode: 0440

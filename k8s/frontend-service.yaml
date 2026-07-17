@@ -6,12 +6,15 @@ metadata:
   labels:
     app.kubernetes.io/name: frontend
     app.kubernetes.io/part-of: dz6
+  annotations:
+    traefik.ingress.kubernetes.io/service.serversscheme: https
+    traefik.ingress.kubernetes.io/service.serverstransport: homework-frontend-transport@kubernetescrd
 spec:
   type: ClusterIP
   selector:
     app.kubernetes.io/name: frontend
   ports:
-    - name: http
-      port: 8080
-      targetPort: http
+    - name: https
+      port: 8443
+      targetPort: https
       protocol: TCP

@@ -1,4 +1,4 @@
 window.APP_CONFIG = {
-    frontendVersion: "v1",
+    frontendVersion: "v2-tls",
     apiBaseUrl: "/api",
 };

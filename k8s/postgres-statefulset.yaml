@@ -25,10 +25,68 @@ spec:
         runAsGroup: 70
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: prepare-postgres-tls
+          image: postgres:15.18-alpine3.24
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -ec
+            - |
+              cp /tls-source/tls.crt /tls-runtime/server.crt
+              cp /tls-source/tls.key /tls-runtime/server.key
+              cp /tls-source/ca.crt /tls-runtime/ca.crt
+              cp /config-source/pg_hba.conf /tls-runtime/pg_hba.conf
+              chown 70:70 /tls-runtime/*
+              chmod 0644 /tls-runtime/server.crt /tls-runtime/ca.crt
+              chmod 0600 /tls-runtime/server.key /tls-runtime/pg_hba.conf
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - FOWNER
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          volumeMounts:
+            - name: postgres-tls-source
+              mountPath: /tls-source
+              readOnly: true
+            - name: postgres-tls-config
+              mountPath: /config-source
+              readOnly: true
+            - name: postgres-tls-runtime
+              mountPath: /tls-runtime
       containers:
         - name: postgres
           image: postgres:15.18-alpine3.24
           imagePullPolicy: IfNotPresent
+          args:
+            - postgres
+            - -c
+            - ssl=on
+            - -c
+            - ssl_cert_file=/etc/postgresql/tls/server.crt
+            - -c
+            - ssl_key_file=/etc/postgresql/tls/server.key
+            - -c
+            - ssl_ca_file=/etc/postgresql/tls/ca.crt
+            - -c
+            - hba_file=/etc/postgresql/tls/pg_hba.conf
+            - -c
+            - ssl_min_protocol_version=TLSv1.2
           ports:
             - name: postgresql
               containerPort: 5432
@@ -90,6 +148,21 @@ spec:
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
+            - name: postgres-tls-runtime
+              mountPath: /etc/postgresql/tls
+              readOnly: true
+      volumes:
+        - name: postgres-tls-source
+          secret:
+            secretName: postgres-tls
+            defaultMode: 0400
+        - name: postgres-tls-config
+          configMap:
+            name: postgres-tls-config
+            defaultMode: 0444
+        - name: postgres-tls-runtime
+          emptyDir:
+            sizeLimit: 1Mi
   volumeClaimTemplates:
     - metadata:
         name: postgres-data

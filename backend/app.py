@@ -15,15 +15,23 @@ except Exception:
     BUILD_INFO = {'version': 'dev', 'message': 'local development build'}
 
 
-def db_dsn() -> str:
-    return (
-        f"host={os.getenv('DB_HOST', 'postgres')} "
-        f"port={os.getenv('DB_PORT', '5432')} "
-        f"dbname={os.getenv('DB_NAME', 'app')} "
-        f"user={os.getenv('DB_USER', 'app')} "
-        f"password={os.getenv('DB_PASSWORD', '')} "
-        "connect_timeout=2"
-    )
+def db_connection_params() -> dict[str, object]:
+    return {
+        'host': os.getenv(
+            'DB_HOST',
+            'postgres.homework.svc.cluster.local',
+        ),
+        'port': int(os.getenv('DB_PORT', '5432')),
+        'dbname': os.getenv('DB_NAME', 'app'),
+        'user': os.getenv('DB_USER', 'app'),
+        'password': os.getenv('DB_PASSWORD', ''),
+        'connect_timeout': 2,
+        'sslmode': os.getenv('DB_SSLMODE', 'verify-full'),
+        'sslrootcert': os.getenv(
+            'DB_SSLROOTCERT',
+            '/etc/dz6-tls/ca.crt',
+        ),
+    }
 
 
 def pod_name() -> str:
@@ -50,7 +58,7 @@ def healthz():
 def readyz():
     # Readiness: Pod получает трафик только когда доступна БД.
     try:
-        with psycopg.connect(db_dsn()) as conn:
+        with psycopg.connect(**db_connection_params()) as conn:
             with conn.cursor() as cur:
                 cur.execute('SELECT 1')
                 cur.fetchone()
@@ -62,7 +70,7 @@ def readyz():
 @app.post('/api/visits')
 @app.get('/api/visits')
 def visits():
-    with psycopg.connect(db_dsn()) as conn:
+    with psycopg.connect(**db_connection_params()) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 '''
@@ -87,4 +95,25 @@ def visits():
         total=total,
         pod=pod_name(),
         version=BUILD_INFO.get('version', 'unknown'),
+    )
+
+
+@app.get('/api/db-tls')
+def database_tls():
+    """Показывает параметры TLS текущего соединения с PostgreSQL."""
+    with psycopg.connect(**db_connection_params()) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                '''
+                SELECT ssl, version, cipher
+                FROM pg_stat_ssl
+                WHERE pid = pg_backend_pid()
+                '''
+            )
+            ssl_enabled, tls_version, cipher = cur.fetchone()
+    return jsonify(
+        database_tls=ssl_enabled,
+        tls_version=tls_version,
+        cipher=cipher,
+        sslmode=db_connection_params()['sslmode'],
     )

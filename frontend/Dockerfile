@@ -7,6 +7,6 @@ COPY --chown=101:101 index.html app.js config.js styles.css /usr/share/nginx/htm
 
 USER 101:101
 
-EXPOSE 8080
+EXPOSE 8443
 
 CMD ["nginx", "-g", "daemon off;"]

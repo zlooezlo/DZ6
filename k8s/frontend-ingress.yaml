@@ -7,9 +7,14 @@ metadata:
     app.kubernetes.io/name: frontend
     app.kubernetes.io/part-of: dz6
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - dz6.local
+      secretName: dz6-external-tls
   rules:
     - host: dz6.local
       http:
@@ -20,4 +25,4 @@ spec:
               service:
                 name: frontend
                 port:
-                  number: 8080
+                  number: 8443

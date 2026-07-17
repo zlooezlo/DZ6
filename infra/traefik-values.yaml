@@ -25,13 +25,19 @@ ports:
   web:
     port: 8000
     exposedPort: 80
-    nodePort: 30080
     protocol: TCP
+    expose:
+      default: false
   websecure:
     port: 8443
     exposedPort: 443
     nodePort: 30443
     protocol: TCP
+    expose:
+      default: true
+    http:
+      tls:
+        enabled: true
 
 podDisruptionBudget:
   enabled: true
@@ -69,4 +75,3 @@ securityContext:
   capabilities:
     drop:
       - ALL
-
