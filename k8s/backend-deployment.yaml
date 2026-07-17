@@ -63,6 +63,13 @@ spec:
                 secretKeyRef:
                   name: app-db-secret
                   key: DB_PASSWORD
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - sleep 10
           startupProbe:
             httpGet:
               path: /healthz
