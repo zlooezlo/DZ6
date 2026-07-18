@@ -25,6 +25,8 @@ spec:
         app.kubernetes.io/name: frontend
         app.kubernetes.io/part-of: dz6
         app.kubernetes.io/version: v2-tls
+      annotations:
+        checksum/frontend-config: "7ce82c83c8e0ad72a2cda0caf98e0d70f7cb793152bc03ea972ed46131f7ca27"
     spec:
       serviceAccountName: frontend
       automountServiceAccountToken: false
@@ -92,6 +94,10 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            - name: frontend-config
+              mountPath: /usr/share/nginx/html/config.js
+              subPath: config.js
+              readOnly: true
             - name: frontend-tls
               mountPath: /etc/dz6-tls
               readOnly: true
@@ -99,6 +105,13 @@ spec:
         - name: tmp
           emptyDir:
             sizeLimit: 32Mi
+        - name: frontend-config
+          configMap:
+            name: frontend-config
+            items:
+              - key: config.js
+                path: config.js
+            defaultMode: 0444
         - name: frontend-tls
           secret:
             secretName: frontend-tls
