@@ -1,0 +1,73 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-ha
+  namespace: homework
+  labels:
+    app.kubernetes.io/name: postgres-ha
+    app.kubernetes.io/part-of: dz6
+    app.kubernetes.io/version: "15.18"
+spec:
+  description: "DZ6 highly available PostgreSQL cluster"
+
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:15.18-system-bookworm
+  imagePullPolicy: IfNotPresent
+
+  primaryUpdateStrategy: unsupervised
+
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+      secret:
+        name: postgres-ha-app
+      encoding: UTF8
+
+  certificates:
+    serverCASecret: postgres-ha-server-ca
+    serverTLSSecret: postgres-ha-server-tls
+
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+    podAntiAffinityType: required
+    nodeSelector:
+      node-role.kubernetes.io/postgres: ""
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+
+  postgresql:
+    parameters:
+      password_encryption: scram-sha-256
+      ssl_min_protocol_version: TLSv1.3
+      max_connections: "100"
+      shared_buffers: 128MB
+
+    synchronous:
+      method: any
+      number: 1
+      dataDurability: required
+
+    pg_hba:
+      - hostssl all all 0.0.0.0/0 scram-sha-256
+      - hostssl all all ::/0 scram-sha-256
+      - hostnossl all all 0.0.0.0/0 reject
+      - hostnossl all all ::/0 reject
+
+  storage:
+    storageClass: local-cnpg
+    size: 5Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  monitoring:
+    enablePodMonitor: false

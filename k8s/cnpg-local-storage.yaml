@@ -1,0 +1,86 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-cnpg
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+allowVolumeExpansion: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cnpg-local-kube1
+  labels:
+    app.kubernetes.io/part-of: dz6
+    storage.dz6/node: kube1
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-cnpg
+  local:
+    path: /var/lib/cnpg/postgres-ha
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kube1
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cnpg-local-kube2
+  labels:
+    app.kubernetes.io/part-of: dz6
+    storage.dz6/node: kube2
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-cnpg
+  local:
+    path: /var/lib/cnpg/postgres-ha
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kube2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cnpg-local-kube3
+  labels:
+    app.kubernetes.io/part-of: dz6
+    storage.dz6/node: kube3
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-cnpg
+  local:
+    path: /var/lib/cnpg/postgres-ha
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kube3
