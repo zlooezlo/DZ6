@@ -1,0 +1,73 @@
+global:
+  enabled: true
+  tlsDisable: false
+
+injector:
+  enabled: false
+
+csi:
+  enabled: false
+
+server:
+  image:
+    repository: hashicorp/vault
+    tag: "2.0.3"
+    pullPolicy: IfNotPresent
+
+  logLevel: info
+  logFormat: standard
+
+  extraEnvironmentVars:
+    VAULT_CACERT: /vault/userconfig/vault-server-tls/vault.ca
+
+  volumes:
+    - name: vault-server-tls
+      secret:
+        secretName: vault-server-tls
+        defaultMode: 420
+
+  volumeMounts:
+    - name: vault-server-tls
+      mountPath: /vault/userconfig/vault-server-tls
+      readOnly: true
+
+  dataStorage:
+    enabled: true
+    size: 2Gi
+    storageClass: nfs-csi
+    accessMode: ReadWriteOnce
+    mountPath: /vault/data
+
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  standalone:
+    enabled: true
+    config: |
+      ui = false
+      disable_mlock = true
+      api_addr = "https://vault.vault.svc.cluster.local:8200"
+
+      listener "tcp" {
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+        tls_cert_file = "/vault/userconfig/vault-server-tls/vault.crt"
+        tls_key_file = "/vault/userconfig/vault-server-tls/vault.key"
+        tls_client_ca_file = "/vault/userconfig/vault-server-tls/vault.ca"
+      }
+
+      storage "file" {
+        path = "/vault/data"
+      }
+
+ui:
+  enabled: false
