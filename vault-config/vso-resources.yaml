@@ -1,0 +1,47 @@
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultConnection
+metadata:
+  name: vault
+  namespace: homework
+  labels:
+    app.kubernetes.io/part-of: dz6
+spec:
+  address: https://vault.vault.svc.cluster.local:8200
+  tlsServerName: vault.vault.svc.cluster.local
+  caCertSecretRef: vault-ca
+  skipTLSVerify: false
+  timeout: 10s
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-auth
+  namespace: homework
+  labels:
+    app.kubernetes.io/part-of: dz6
+spec:
+  vaultConnectionRef: vault
+  method: kubernetes
+  mount: kubernetes
+  kubernetes:
+    role: homework-backend
+    serviceAccount: vault-auth
+    audiences:
+      - vault
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: backend-database
+  namespace: homework
+  labels:
+    app.kubernetes.io/part-of: dz6
+spec:
+  vaultAuthRef: vault-auth
+  mount: dz6
+  path: homework/database
+  destination:
+    name: vault-app-db-secret
+    create: true
+  refreshAfter: 5m
