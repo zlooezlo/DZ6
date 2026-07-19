@@ -38,10 +38,15 @@ metadata:
   labels:
     app.kubernetes.io/part-of: dz6
 spec:
+  type: kv-v2
   vaultAuthRef: vault-auth
   mount: dz6
   path: homework/database
   destination:
     name: vault-app-db-secret
     create: true
+  hmacSecretData: true
+  rolloutRestartTargets:
+    - kind: Deployment
+      name: backend
   refreshAfter: 5m
