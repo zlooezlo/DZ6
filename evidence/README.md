@@ -1,11 +1,19 @@
-# Доказательства выполнения
+# Доказательства выполнения проекта DZ6
 
-Сюда добавляются обезличенные выводы команд и выбранные скриншоты для отчёта:
+Каталог содержит команды и обезличенные результаты практических проверок Kubernetes-кластера и приложения.
 
-- состояние узлов и системных компонентов;
-- EndpointSlice и проверки Service;
-- self-healing, RollingUpdate и rollback;
-- сохранность PostgreSQL после пересоздания Pod;
-- readiness, NetworkPolicy, cordon и drain.
+Основные документы:
 
-Не добавляйте kubeconfig, токены и реальные пароли.
+- `backend.md` — исторический этап backend до перехода на HTTPS;
+- `frontend.md` — исторический этап frontend до перехода на HTTPS;
+- `ingress.md` — исторический этап HTTP Ingress;
+- `network-policy.md` — внедрение и проверка NetworkPolicy;
+- `https-only.md` — актуальная конфигурация сквозного TLS;
+- `operations.md` — RollingUpdate, rollback, self-healing и graceful shutdown;
+- `certificate-renewal.md` — замена сертификатов Kubernetes;
+- `postgresql-ha.md` — CloudNativePG, репликация, failover, backup и restore;
+- `vault.md` — Vault, VSO, автоматический rollout и ротация пароля;
+- `rbac.md` — ServiceAccount и RBAC с минимальными правами;
+- `images.md` — финальные TLS-образы и их digest.
+
+Реальные пароли, токены, unseal-ключи, kubeconfig, приватные ключи и recovery-файлы в доказательства не включаются.

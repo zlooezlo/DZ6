@@ -1,28 +1,55 @@
 #!/usr/bin/env bash
-set -euo pipefail
+
+set -Eeuo pipefail
 
 REGISTRY="${REGISTRY:-zlooezlo}"
-BACKEND_IMAGE="$REGISTRY/k8s-homework-backend"
-FRONTEND_IMAGE="$REGISTRY/k8s-homework-frontend"
+PUSH="${PUSH:-false}"
 
-docker build ./backend \
-  --build-arg APP_VERSION=v1 \
-  --build-arg RELEASE_MESSAGE="initial release" \
-  -t "$BACKEND_IMAGE:v1"
+BACKEND_IMAGE="${REGISTRY}/k8s-homework-backend:v3-tls"
+FRONTEND_IMAGE="${REGISTRY}/k8s-homework-frontend:v2-tls"
 
-docker build ./backend \
-  --build-arg APP_VERSION=v2 \
-  --build-arg RELEASE_MESSAGE="rolling update completed" \
-  -t "$BACKEND_IMAGE:v2"
+echo "=== Сборка backend TLS ==="
 
-docker build ./frontend \
-  -t "$FRONTEND_IMAGE:v1"
+docker build \
+  --pull \
+  --build-arg APP_VERSION=v3-tls \
+  --build-arg RELEASE_MESSAGE='end-to-end TLS release' \
+  --tag "$BACKEND_IMAGE" \
+  backend
 
-docker push "$BACKEND_IMAGE:v1"
-docker push "$BACKEND_IMAGE:v2"
-docker push "$FRONTEND_IMAGE:v1"
+echo
+echo "=== Сборка frontend TLS ==="
 
-echo "Built and pushed:"
-echo "  $BACKEND_IMAGE:v1"
-echo "  $BACKEND_IMAGE:v2"
-echo "  $FRONTEND_IMAGE:v1"
+docker build \
+  --pull \
+  --tag "$FRONTEND_IMAGE" \
+  frontend
+
+echo
+echo "=== Проверка непривилегированных пользователей ==="
+
+docker run \
+  --rm \
+  --entrypoint id \
+  "$BACKEND_IMAGE"
+
+docker run \
+  --rm \
+  --entrypoint id \
+  "$FRONTEND_IMAGE"
+
+if test "$PUSH" = "true"; then
+  echo
+  echo "=== Публикация образов ==="
+
+  docker push "$BACKEND_IMAGE"
+  docker push "$FRONTEND_IMAGE"
+else
+  echo
+  echo "INFO: публикация пропущена"
+  echo "Для публикации выполните:"
+  echo "PUSH=true ./build-images.sh"
+fi
+
+echo
+echo "PASS: финальные TLS-образы собраны"

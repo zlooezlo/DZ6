@@ -1,56 +1,18 @@
-# Инфраструктура
+# Эксплуатационные файлы проекта DZ6
 
-Здесь будут скрипты подготовки Ubuntu Server и заметки по трём VirtualBox VM:
+Каталог содержит сценарии, Helm values и инструкции, использованные для развёртывания и проверки проекта.
 
-- `kube1` — control plane;
-- `kube2` — worker;
-- `kube3` — worker.
+Основные файлы:
 
-## NFS
+- `generate-dz6-tls.sh` — создание внутреннего CA и TLS-сертификатов приложения;
+- `deploy-https-only.sh` — применение HTTPS-only конфигурации;
+- `verify-https-only.sh` — проверка внешнего HTTPS и TLS к PostgreSQL;
+- `HTTPS_ONLY.md` — описание сквозного TLS;
+- `install-cnpg.sh` — установка CloudNativePG;
+- `prepare-cnpg-local-storage.sh` — подготовка локальных томов CNPG;
+- `generate-postgres-ha-tls.sh` — создание сертификата PostgreSQL HA;
+- `verify-postgres-ha.sh` — проверка PostgreSQL HA;
+- `POSTGRES_HA.md` — эксплуатация PostgreSQL HA;
+- `vault-values.yaml` — актуальные Helm values HashiCorp Vault без `fsGroup`.
 
-На `kube1` NFS-сервер настраивается командой:
-
-```bash
-sudo ./infra/setup-nfs-server.sh
-```
-
-Официальный NFS CSI driver устанавливается с зафиксированной версией chart:
-
-```bash
-helm repo add csi-driver-nfs \
-  https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
-helm repo update
-
-helm upgrade --install csi-driver-nfs \
-  csi-driver-nfs/csi-driver-nfs \
-  --version 4.13.4 \
-  --namespace kube-system \
-  --values infra/nfs-csi-values.yaml \
-  --wait \
-  --timeout 10m
-
-kubectl apply -f k8s/storageclass-nfs-csi.yaml
-```
-
-Проверка динамического PVC:
-
-```bash
-kubectl apply -f k8s/storage-smoke-test.yaml
-```
-
-## CRI-O
-
-Узлы подготовлены к переходу с containerd на CRI-O командой:
-
-```bash
-sudo ./infra/prepare-crio.sh
-```
-
-Скрипт устанавливает и фиксирует CRI-O `1.33.13`, сохраняет исходные параметры
-kubelet, меняет CRI endpoint и настраивает `crictl`. Остановка runtime и reboot
-намеренно выполняются вручную только после `kubectl drain`.
-
-Workers переключаются по одному. Перед перезагрузкой control plane PostgreSQL
-масштабируется до нуля, поскольку kube1 также предоставляет NFS. После каждого
-узла проверяются Ready, системные DaemonSet Pod, DNS и создание контейнера с
-идентификатором `cri-o://`.
+Сценарии не выводят значения паролей или приватных ключей. Реальные секреты создаются вне Git.
