@@ -9,6 +9,15 @@ csi:
   enabled: false
 
 server:
+  statefulSet:
+    securityContext:
+      pod:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 1000
+      container:
+        allowPrivilegeEscalation: false
+
   image:
     repository: hashicorp/vault
     tag: "2.0.3"
