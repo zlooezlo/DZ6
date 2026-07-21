@@ -63,6 +63,27 @@
 - согласованная ротация пароля PostgreSQL;
 - автоматический rollout backend после обновления Secret.
 
+## Порядок развёртывания с нуля
+
+1. Подготовить три узла, установить CRI-O, kubeadm, kubelet и kubectl.
+2. Выполнить `kubeadm init` на `kube1`, присоединить `kube2` и `kube3`.
+3. Установить Calico, NFS CSI и Traefik.
+4. Собрать финальные образы командой `./build-images.sh`.
+5. Установить CloudNativePG командой `./infra/install-cnpg.sh`.
+6. Подготовить локальные тома CNPG командой `./infra/prepare-cnpg-local-storage.sh`.
+7. Создать TLS-секреты приложения и PostgreSQL сценариями из каталога `infra`.
+8. На `kube1` выполнить `./infra/generate-vault-tls.sh`.
+9. Установить Vault официальным Helm chart `0.34.0` с файлом `infra/vault-values.yaml`.
+10. Выполнить `./infra/initialize-vault.sh`. Файл `~/vault-init.json` должен храниться вне Git с правами `0600`.
+11. Выполнить `./infra/configure-vault-kubernetes-auth.sh`.
+12. Создать bootstrap-учётные данные PostgreSQL и записать то же значение `DB_PASSWORD` в Vault KV v2 без вывода значения.
+13. Применить манифесты PostgreSQL HA и дождаться состояния `3/3`.
+14. Установить Vault Secrets Operator `1.4.1`.
+15. Применить `vault-config/vso-resources.yaml` и манифесты приложения.
+16. Выполнить проверки из `infra/verify-https-only.sh` и `infra/verify-postgres-ha.sh`.
+
+Манифест `k8s/vault-auth-rbac.yaml` создаёт ServiceAccount `vault-auth` и разрешает Vault выполнять TokenReview. TLS-секреты и recovery material создаются только во время развёртывания и не сохраняются в Git.
+
 ## Безопасность секретов
 
 Реальные пароли, root token Vault, unseal-ключи, приватные ключи PKI, kubeconfig и recovery-файлы не хранятся в Git.
